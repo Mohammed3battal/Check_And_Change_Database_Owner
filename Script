@@ -1,0 +1,22 @@
+-- Check current database owners
+SELECT 
+    name AS DatabaseName,
+    SUSER_SNAME(owner_sid) AS OwnerName
+FROM 
+    sys.databases;
+
+
+-- BE CAREFUL: Changing the database owner to 'sa' may remove access for app service accounts
+
+USE [master];
+GO
+
+-- Generate script to change owner to 'sa' for databases with a specific owner
+SELECT 
+    'USE [' + db.name + ']; EXEC sp_changedbowner ''sa'';' AS ChangeOwnerScript
+FROM 
+    sys.databases db
+LEFT JOIN 
+    sys.server_principals sp ON db.owner_sid = sp.sid
+WHERE 
+    sp.name = ''  -- <-- Put the current owner you want to replace here
